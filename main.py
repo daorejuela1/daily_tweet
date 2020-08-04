@@ -1,14 +1,16 @@
 import requests
 from random import randrange
 import tweepy
-import credentials
 import os
+import time
+from os import environ
 
-consumer_key = credentials.API_KEY
-consumer_secret_key = credentials.API_SECRET_KEY
-access_token = credentials.ACCESS_TOKEN
-access_token_secret = credentials.ACCESS_TOKEN_SECRET
-
+consumer_key = environ['API_KEY']
+consumer_secret_key = environ['API_SECRET_KEY']
+access_token = environ['ACCESS_TOKEN']
+access_token_secret = environ['ACCESS_TOKEN_SECRET']
+# INTERVAL = 60 * 60 * 24  # tweet every 24 hours
+INTERVAL = 60  # every 60 seconds, for testing
 
 def get_random_quote():
     """
@@ -76,4 +78,6 @@ def tweet_quote():
 
 
 if __name__ == "__main__":
-    tweet_quote()
+    while True:
+        tweet_quote()
+        time.sleep(INTERVAL)
