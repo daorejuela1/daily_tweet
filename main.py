@@ -9,8 +9,8 @@ consumer_key = environ['API_KEY']
 consumer_secret_key = environ['API_SECRET_KEY']
 access_token = environ['ACCESS_TOKEN']
 access_token_secret = environ['ACCESS_TOKEN_SECRET']
-# INTERVAL = 60 * 60 * 24  # tweet every 24 hours
-INTERVAL = 60  # every 60 seconds, for testing
+INTERVAL = 60 * 60 * 24  # tweet every 24 hours
+
 
 def get_random_quote():
     """
