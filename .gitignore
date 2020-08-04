@@ -1,4 +1,7 @@
 *
-!main.py
+!*.py
+credentials.py
 !.gitignore
 !*.md
+!*.txt
+
