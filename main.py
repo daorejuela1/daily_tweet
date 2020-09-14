@@ -1,15 +1,24 @@
-import requests
 from random import randrange
+from os import environ
+import credentials
+import requests
+import schedule
 import tweepy
+import random
 import os
 import time
-from os import environ
 
+# consumer_key = credentials.API_KEY
+# consumer_secret_key = credentials.API_SECRET_KEY
+# access_token = credentials.ACCESS_TOKEN
+# access_token_secret = credentials.ACCESS_TOKEN_SECRET
 consumer_key = environ['API_KEY']
 consumer_secret_key = environ['API_SECRET_KEY']
 access_token = environ['ACCESS_TOKEN']
 access_token_secret = environ['ACCESS_TOKEN_SECRET']
-INTERVAL = 60 * 60 * 24  # tweet every 24 hours
+image_name = "temp.jpg"
+global tweet_counter
+tweet_counter = 0
 
 
 def get_random_quote():
@@ -17,18 +26,22 @@ def get_random_quote():
     Gets a random quote from the They Said So API
     :return: quote or ask again in any error case
     """
-    today_theme = randrange(0, 6)
-    tag_wheel = ['inspire', 'management', 'life', 'funny','love','art','students']
-    url = 'https://quotes.rest/qod?category=' + tag_wheel[today_theme]
+    global tweet_counter
+    tag_wheel = ['inspire', 'management', 'life',
+                 'love', 'art', 'students', 'funny']
+    if tweet_counter == 0:
+        week_order = random.sample(range(len(tag_wheel)), len(tag_wheel))
+    today_theme = week_order[tweet_counter]
+    url = "https://quotes.rest/qod?category={}".format(tag_wheel[today_theme])
     response = requests.get(url)
     if response.status_code == 200:
         quotes = response.json()['contents']['quotes'][0]
-        if int(quotes['length']) >= 250:
-            tweet_quote()
-        else:
+        if int(quotes['length']) <= 250:
+            tweet_counter += 1
+            if (tweet_counter == 7):
+                tweet_counter = 0
             return quotes
-    else:
-        tweet_quote()
+    return None
 
 
 def create_tweet():
@@ -37,11 +50,15 @@ def create_tweet():
     :return: String with the tweet
     """
     quotes = get_random_quote()
-    if not quotes:
-        tweet_quote()
+    while quotes is None:
+        quotes = get_random_quote()
     download_image(quotes['background'])
-    message = quotes['title'] + "\n\n" + "\"" + quotes['quote'] + "\"" + " -- " + quotes['author']
+    message = """{}
+
+"{}" -- {}""".format(quotes['title'], quotes['quote'], quotes['author'])
     for tags in quotes['tags']:
+        tags = tags.title()
+        tags = tags.replace("-", "")
         message = message + " #" + tags
     message += " #TheySaidSo"
     return message
@@ -53,14 +70,12 @@ def download_image(url):
     :param url: url of the image to download
     :return: Nothing
     """
-    filename = 'temp.jpg'
+    filename = image_name
     request = requests.get(url, stream=True)
     if request.status_code == 200:
         with open(filename, 'wb') as image:
             for chunk in request:
                 image.write(chunk)
-    else:
-        tweet_quote()
 
 
 def tweet_quote():
@@ -72,12 +87,16 @@ def tweet_quote():
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
     tweet_message = create_tweet()
-    api.update_with_media("temp.jpg", tweet_message)
-    os.remove("temp.jpg")
+    api.update_with_media(image_name, tweet_message)
+    os.remove(image_name)
     print("Tweet displayed")
 
+schedule.every().day.at("14:00").do(tweet_quote)
 
 if __name__ == "__main__":
+    """
+    Runs scheduled tweet
+    """
     while True:
-        tweet_quote()
-        time.sleep(INTERVAL)
+        schedule.run_pending()
+        time.sleep(1)
