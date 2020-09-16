@@ -97,6 +97,4 @@ if __name__ == "__main__":
     """
     Runs scheduled tweet
     """
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    tweet_quote()
