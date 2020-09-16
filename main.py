@@ -36,7 +36,7 @@ def get_random_quote():
     response = requests.get(url)
     if response.status_code == 200:
         quotes = response.json()['contents']['quotes'][0]
-        if int(quotes['length']) <= 250:
+        if int(quotes['length']) <= 200:
             tweet_counter += 1
             if (tweet_counter == 7):
                 tweet_counter = 0
@@ -91,10 +91,12 @@ def tweet_quote():
     os.remove(image_name)
     print("Tweet displayed")
 
-schedule.every().day.at("14:00").do(tweet_quote)
+schedule.every().day.at("18:00").do(tweet_quote)
 
 if __name__ == "__main__":
     """
     Runs scheduled tweet
     """
-    tweet_quote()
+     while True:
+        schedule.run_pending()
+        time.sleep(1)
