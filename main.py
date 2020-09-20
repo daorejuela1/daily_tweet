@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 from random import randrange
 from os import environ
 # import credentials
@@ -92,10 +91,12 @@ def tweet_quote():
     os.remove(image_name)
     print("Tweet displayed")
 
-schedule.every().day.at("15:15").do(tweet_quote)
+schedule.every().day.at("16:00").do(tweet_quote)
 
 if __name__ == "__main__":
     """
     Runs scheduled tweet
     """
-    tweet_quote()
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
