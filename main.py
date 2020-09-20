@@ -1,6 +1,7 @@
+#!/usr/bin/python3
 from random import randrange
 from os import environ
-import credentials
+# import credentials
 import requests
 import schedule
 import tweepy
